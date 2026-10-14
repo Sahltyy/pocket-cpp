@@ -2,7 +2,7 @@
 
 A real C++17 compiler that runs in your phone's browser. Write code, tap **Run**, see the output. It works offline after the first load, and nothing is sent to a server.
 
-**Open it:** https://shade711.github.io/pocket-cpp/
+**Open it:** https://sahltyy.github.io/pocket-cpp/
 
 On iPhone, open the link in Safari, tap **Share**, then **Add to Home Screen**. It opens full screen like any other app.
 
