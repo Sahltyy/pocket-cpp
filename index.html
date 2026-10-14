@@ -1,0 +1,1712 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ECF1E4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111713" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Pocket C++">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta property="og:title" content="Pocket C++">
+<meta property="og:description" content="A C++ compiler that runs right on your phone. Free, offline, no sign-up.">
+<meta property="og:image" content="icon-512.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root { padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
+body { margin: 0; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+</style>
+<title>Pocket C++</title>
+<meta name="description" content="A C++ compiler that runs right on your phone. Free, offline, no sign-up.">
+<link rel="preload" href="fonts/ubuntu-mono-400.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face { font-family: "Martian Mono"; src: url("fonts/martian-mono.woff2") format("woff2"); font-weight: 100 800; font-stretch: 75% 112.5%; font-display: swap; }
+@font-face { font-family: "Overpass"; src: url("fonts/overpass-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Overpass"; src: url("fonts/overpass-600.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Overpass"; src: url("fonts/overpass-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Overpass"; src: url("fonts/overpass-800.woff2") format("woff2"); font-weight: 800; font-display: swap; }
+@font-face { font-family: "Ubuntu Mono"; src: url("fonts/ubuntu-mono-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Ubuntu Mono"; src: url("fonts/ubuntu-mono-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+</style>
+</head>
+<body>
+<style>
+/* Layout: one-screen phone app. Bar (brand + Run) / tabs / one pane at a time.
+   Engineering-pad paper, graphite ink, highlighter-yellow for the one action. */
+:root {
+  --paper: #ECF1E4;
+  --sheet: #F8FAF3;
+  --ink: #1C241E;
+  --muted: #5B695E;
+  --rule: #CAD6C3;
+  --rule-strong: #9DAE98;
+  --grid: rgba(64, 110, 72, 0.11);
+  --marker: #F4D43C;
+  --marker-ink: #1C241E;
+  --marker-soft: rgba(244, 212, 60, 0.38);
+  --err: #B3362B;
+  --err-bg: rgba(179, 54, 43, 0.08);
+  --warn: #9C5A0C;
+  --warn-bg: rgba(156, 90, 12, 0.09);
+  --ok: #2B7046;
+  --ok-bg: rgba(43, 112, 70, 0.09);
+  --kw: #1C59A3;
+  --str: #9A4811;
+  --num: #7A3B98;
+  --com: #7C8B7F;
+  --pre: #8B386C;
+  --type: #12726B;
+  --scrim: rgba(28, 36, 30, 0.38);
+  --press: #1C241E;
+  --shadow: 0 -8px 32px rgba(28, 36, 30, 0.18);
+
+  --f-mark: "Martian Mono", ui-monospace, Menlo, monospace;
+  --f-ui: "Overpass", -apple-system, system-ui, "Segoe UI", sans-serif;
+  --f-code: "Ubuntu Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --line: 24px;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #111713; --sheet: #161D18; --ink: #DDE5D8; --muted: #8E9C90;
+    --rule: #29342C; --rule-strong: #3C4B40; --grid: rgba(160, 210, 170, 0.065);
+    --marker: #EFCE3A; --marker-ink: #191A10; --marker-soft: rgba(239, 206, 58, 0.22);
+    --err: #F2806E; --err-bg: rgba(242, 128, 110, 0.12);
+    --warn: #E8A658; --warn-bg: rgba(232, 166, 88, 0.12);
+    --ok: #66C890; --ok-bg: rgba(102, 200, 144, 0.12);
+    --kw: #8DBDF4; --str: #E9AA78; --num: #D6A6EA; --com: #718276; --pre: #E994C4; --type: #74D4CA;
+    --scrim: rgba(0, 0, 0, 0.55); --shadow: 0 -8px 32px rgba(0, 0, 0, 0.5); --press: #060907;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #111713; --sheet: #161D18; --ink: #DDE5D8; --muted: #8E9C90;
+  --rule: #29342C; --rule-strong: #3C4B40; --grid: rgba(160, 210, 170, 0.065);
+  --marker: #EFCE3A; --marker-ink: #191A10; --marker-soft: rgba(239, 206, 58, 0.22);
+  --err: #F2806E; --err-bg: rgba(242, 128, 110, 0.12);
+  --warn: #E8A658; --warn-bg: rgba(232, 166, 88, 0.12);
+  --ok: #66C890; --ok-bg: rgba(102, 200, 144, 0.12);
+  --kw: #8DBDF4; --str: #E9AA78; --num: #D6A6EA; --com: #718276; --pre: #E994C4; --type: #74D4CA;
+  --scrim: rgba(0, 0, 0, 0.55); --shadow: 0 -8px 32px rgba(0, 0, 0, 0.5); --press: #060907;
+  color-scheme: dark;
+}
+
+.CodeMirror{position:relative;overflow:hidden;direction:ltr} .CodeMirror-lines{padding:4px 0} .CodeMirror pre.CodeMirror-line,.CodeMirror pre.CodeMirror-line-like{padding:0 6px} .CodeMirror-gutters{white-space:nowrap} .CodeMirror-linenumber{padding:0 6px 0 4px;min-width:20px;text-align:right;white-space:nowrap} .CodeMirror-cursor{border-left:2px solid;border-right:none;width:0} .cm-tab{display:inline-block;text-decoration:inherit} .CodeMirror-composing{border-bottom:2px solid}  .CodeMirror { position: relative; overflow: hidden; } .CodeMirror-scroll { overflow: scroll !important; margin-bottom: -50px; margin-right: -50px; padding-bottom: 50px; height: 100%; outline: none; position: relative; z-index: 0; } .CodeMirror-sizer { position: relative; border-right: 50px solid transparent; } .CodeMirror-vscrollbar, .CodeMirror-hscrollbar, .CodeMirror-scrollbar-filler, .CodeMirror-gutter-filler { position: absolute; z-index: 6; display: none; outline: none; } .CodeMirror-vscrollbar { right: 0; top: 0; overflow-x: hidden; overflow-y: scroll; } .CodeMirror-hscrollbar { bottom: 0; left: 0; overflow-y: hidden; overflow-x: scroll; } .CodeMirror-scrollbar-filler { right: 0; bottom: 0; } .CodeMirror-gutter-filler { left: 0; bottom: 0; } .CodeMirror-gutters { position: absolute; left: 0; top: 0; min-height: 100%; z-index: 3; } .CodeMirror-gutter { white-space: normal; height: 100%; display: inline-block; vertical-align: top; margin-bottom: -50px; } .CodeMirror-gutter-wrapper { position: absolute; z-index: 4; background: none !important; border: none !important; } .CodeMirror-gutter-background { position: absolute; top: 0; bottom: 0; z-index: 4; } .CodeMirror-gutter-elt { position: absolute; cursor: default; z-index: 4; } .CodeMirror-gutter-wrapper ::selection { background-color: transparent } .CodeMirror-gutter-wrapper ::-moz-selection { background-color: transparent } .CodeMirror-lines { cursor: text; min-height: 1px; } .CodeMirror pre.CodeMirror-line, .CodeMirror pre.CodeMirror-line-like { -moz-border-radius: 0; -webkit-border-radius: 0; border-radius: 0; border-width: 0; background: transparent; font-family: inherit; font-size: inherit; margin: 0; white-space: pre; word-wrap: normal; line-height: inherit; color: inherit; z-index: 2; position: relative; overflow: visible; -webkit-tap-highlight-color: transparent; -webkit-font-variant-ligatures: contextual; font-variant-ligatures: contextual; } .CodeMirror-wrap pre.CodeMirror-line, .CodeMirror-wrap pre.CodeMirror-line-like { word-wrap: break-word; white-space: pre-wrap; word-break: normal; } .CodeMirror-linebackground { position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 0; } .CodeMirror-linewidget { position: relative; z-index: 2; padding: 0.1px; } .CodeMirror-widget {} .CodeMirror-rtl pre { direction: rtl; } .CodeMirror-code { outline: none; } .CodeMirror-scroll, .CodeMirror-sizer, .CodeMirror-gutter, .CodeMirror-gutters, .CodeMirror-linenumber { -moz-box-sizing: content-box; box-sizing: content-box; } .CodeMirror-measure { position: absolute; width: 100%; height: 0; overflow: hidden; visibility: hidden; } .CodeMirror-cursor { position: absolute; pointer-events: none; } .CodeMirror-measure pre { position: static; } div.CodeMirror-cursors { visibility: hidden; position: relative; z-index: 3; } div.CodeMirror-dragcursors { visibility: visible; } .CodeMirror-focused div.CodeMirror-cursors { visibility: visible; } .CodeMirror-selected { background: #d9d9d9; } .CodeMirror-focused .CodeMirror-selected { background: #d7d4f0; } .CodeMirror-crosshair { cursor: crosshair; } .CodeMirror-line::selection, .CodeMirror-line > span::selection, .CodeMirror-line > span > span::selection { background: #d7d4f0; } .CodeMirror-line::-moz-selection, .CodeMirror-line > span::-moz-selection, .CodeMirror-line > span > span::-moz-selection { background: #d7d4f0; } .cm-searching { background-color: #ffa; background-color: rgba(255, 255, 0, .4); } .cm-force-border { padding-right: .1px; } @media print { .CodeMirror div.CodeMirror-cursors { visibility: hidden; } } .cm-tab-wrap-hack:after { content: ''; } span.CodeMirror-selectedtext { background: none; }
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--f-ui);
+  font-size: 15px;
+  line-height: 1.45;
+  overflow: hidden;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, textarea:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--kw); outline-offset: 2px;
+}
+
+.app {
+  height: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding-inline: 16px;
+  padding-block: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ---------- top bar ---------- */
+.bar { display: flex; align-items: center; gap: 10px; min-height: 46px; }
+.brand { display: flex; flex-direction: column; min-width: 0; flex: 1; gap: 2px; }
+.mark {
+  font-family: var(--f-mark);
+  font-stretch: 78%;
+  font-weight: 800;
+  font-size: 19px;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.mark .pp {
+  background: linear-gradient(transparent 18%, var(--marker-soft) 18%, var(--marker-soft) 88%, transparent 88%);
+  padding: 0 2px;
+  margin-left: 1px;
+}
+.status {
+  align-self: flex-start;
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 0; background: none; padding: 0;
+  font-size: 12px; color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.status .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--rule-strong); flex: none; }
+.status[data-state="loading"] .dot, .status[data-state="preparing"] .dot { background: var(--marker); animation: pulse 1s ease-in-out infinite; }
+.status[data-state="ready"] .dot { background: var(--ok); }
+.status[data-state="error"] .dot { background: var(--err); }
+@keyframes pulse { 50% { opacity: 0.35; } }
+
+.icon-btn {
+  width: 42px; height: 42px; flex: none;
+  display: grid; place-items: center;
+  border: 1px solid var(--rule); border-radius: var(--radius);
+  background: var(--sheet);
+}
+.icon-btn svg { width: 20px; height: 20px; }
+.run {
+  height: 42px; flex: none;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 0 16px 0 14px;
+  border: 1.5px solid var(--press); border-radius: var(--radius);
+  background: var(--marker); color: var(--marker-ink);
+  font-weight: 800; font-size: 15px; letter-spacing: 0.02em;
+  box-shadow: 0 2px 0 var(--press);
+  transition: transform 0.06s ease, box-shadow 0.06s ease;
+}
+.run:active { transform: translateY(2px); box-shadow: 0 0 0 var(--press); }
+.run svg { width: 14px; height: 14px; }
+.run[data-mode="building"] { background: var(--sheet); color: var(--ink); }
+.run[data-mode="running"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.run:disabled { cursor: progress; }
+
+/* ---------- tabs ---------- */
+.tabs { display: flex; border-bottom: 1px solid var(--rule); }
+.tab {
+  flex: 1;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 38px; border: 0; background: none;
+  font-weight: 700; font-size: 14px; color: var(--muted);
+  letter-spacing: 0.04em; text-transform: uppercase;
+  border-bottom: 3px solid transparent; margin-bottom: -1px;
+}
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--marker); }
+.pill {
+  min-width: 18px; height: 18px; padding: 0 5px;
+  border-radius: 9px; font-size: 11px; line-height: 18px; text-align: center;
+  font-variant-numeric: tabular-nums; letter-spacing: 0;
+  background: var(--rule); color: var(--ink);
+}
+.pill.err { background: var(--err); color: var(--sheet); }
+.pill.ok { background: var(--ok); color: var(--sheet); }
+
+/* ---------- panes ---------- */
+.panes { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.pane { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.pane.scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 12px; }
+
+.keys {
+  display: flex; gap: 6px; overflow-x: auto; flex: none;
+  padding: 2px 1px 4px;
+  scrollbar-width: none;
+}
+.keys::-webkit-scrollbar { display: none; }
+.key {
+  flex: none; min-width: 40px; height: 38px; padding: 0 10px;
+  border: 1px solid var(--rule); border-bottom-width: 2px; border-radius: 8px;
+  background: var(--sheet);
+  font-family: var(--f-code); font-size: 18px; font-weight: 700;
+  touch-action: manipulation;
+}
+.key:active { background: var(--marker-soft); }
+.key.wide { font-family: var(--f-ui); font-size: 13px; font-weight: 700; letter-spacing: 0.03em; }
+
+.editor-wrap {
+  flex: 1; min-height: 0;
+  border: 1px solid var(--rule); border-radius: var(--radius);
+  overflow: hidden; background: var(--sheet);
+}
+.editor-wrap > textarea, .CodeMirror {
+  width: 100%; height: 100%;
+  font-family: var(--f-code); font-size: 16px; line-height: var(--line);
+  background: var(--sheet); color: var(--ink);
+}
+.editor-wrap > textarea { border: 0; padding: 4px 10px; resize: none; white-space: pre; outline: none; }
+.CodeMirror-lines {
+  background-image: linear-gradient(to bottom, transparent calc(var(--line) - 1px), var(--grid) calc(var(--line) - 1px));
+  background-size: 100% var(--line);
+  background-position: 0 4px;
+}
+.CodeMirror-gutters { background: var(--paper); border-right: 1px solid var(--rule); }
+.CodeMirror-linenumber { color: var(--muted); font-size: 13px; }
+.CodeMirror-cursor { border-left-color: var(--ink); }
+.CodeMirror-selected { background: var(--marker-soft) !important; }
+.CodeMirror-line::selection, .CodeMirror-line > span::selection, .CodeMirror-line > span > span::selection { background: var(--marker-soft); }
+.cm-keyword { color: var(--kw); font-weight: 700; }
+.cm-type, .cm-variable-3 { color: var(--type); }
+.cm-string, .cm-string-2 { color: var(--str); }
+.cm-number, .cm-atom { color: var(--num); }
+.cm-comment { color: var(--com); font-style: italic; }
+.cm-meta { color: var(--pre); }
+.cm-def { font-weight: 700; }
+.cm-builtin { color: var(--type); }
+div.CodeMirror span.CodeMirror-matchingbracket { background: var(--marker-soft); color: inherit; }
+div.CodeMirror span.CodeMirror-nonmatchingbracket { color: var(--err); }
+.line-error { background: var(--err-bg); }
+.line-warning { background: var(--warn-bg); }
+.line-flash { background: var(--marker-soft); }
+
+/* ---------- input pane ---------- */
+.field-label { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.eyebrow { font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.mono-note { font-family: var(--f-code); font-size: 14px; color: var(--muted); }
+#stdin {
+  flex: 1; min-height: 160px; width: 100%;
+  border: 1px solid var(--rule); border-radius: var(--radius);
+  background: var(--sheet); color: var(--ink);
+  font-family: var(--f-code); font-size: 16px; line-height: var(--line);
+  padding: 6px 10px; resize: none;
+  background-image: linear-gradient(to bottom, transparent calc(var(--line) - 1px), var(--grid) calc(var(--line) - 1px));
+  background-size: 100% var(--line); background-position: 0 6px; background-attachment: local;
+}
+.hint { margin: 0; color: var(--muted); font-size: 14px; max-width: 60ch; }
+
+/* ---------- output pane ---------- */
+.titleblock {
+  display: grid; grid-template-columns: 1fr 1fr;
+  border: 1.5px solid var(--ink); border-radius: 4px;
+  background: var(--sheet); flex: none;
+}
+.tb-cell { padding: 5px 9px 6px; border-top: 1px solid var(--rule-strong); min-width: 0; }
+.tb-cell:nth-child(-n+2) { border-top: 0; }
+.tb-cell:nth-child(odd) { border-right: 1px solid var(--rule-strong); }
+.tb-cell.span { grid-column: 1 / -1; border-right: 0; }
+.tb-k { display: block; font-size: 10.5px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.tb-v { display: block; font-family: var(--f-code); font-size: 15px; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.result { font-family: var(--f-ui); font-weight: 800; font-size: 15px; }
+.result.ok { color: var(--ok); } .result.err { color: var(--err); } .result.warn { color: var(--warn); }
+.meter { height: 6px; border-radius: 3px; background: var(--rule); overflow: hidden; margin-top: 6px; }
+.meter > i { display: block; height: 100%; width: 0; background: var(--marker); border-right: 1.5px solid var(--ink); transition: width 0.2s ease; }
+
+#outputBody { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.diags { display: flex; flex-direction: column; gap: 8px; }
+.diag {
+  display: block; width: 100%; text-align: left;
+  border: 1px solid var(--rule); border-left: 4px solid var(--err); border-radius: 6px;
+  background: var(--sheet); padding: 8px 10px; min-width: 0;
+}
+.diag.warning { border-left-color: var(--warn); }
+.diag-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.sev { font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--err); }
+.diag.warning .sev { color: var(--warn); }
+.loc { font-family: var(--f-code); font-size: 14px; color: var(--muted); }
+.jump { margin-left: auto; font-size: 12px; font-weight: 700; color: var(--kw); white-space: nowrap; }
+.diag-msg { margin: 3px 0 0; font-weight: 600; overflow-wrap: anywhere; }
+.diag-tip { margin: 4px 0 0; font-size: 14px; color: var(--ink); }
+.diag-tip b { background: var(--marker-soft); padding: 0 3px; border-radius: 2px; }
+.snippet {
+  margin: 6px 0 0; padding: 6px 8px; border-radius: 4px; background: var(--paper);
+  font-family: var(--f-code); font-size: 14px; line-height: 1.35; overflow-x: auto; white-space: pre;
+}
+.notes { margin-top: 6px; font-size: 13px; color: var(--muted); }
+.notes summary { cursor: pointer; font-weight: 700; }
+.notes p { margin: 4px 0 0; overflow-wrap: anywhere; }
+
+.console-box { border: 1px solid var(--rule); border-radius: 6px; background: var(--sheet); overflow: hidden; flex: none; }
+.console-head {
+  display: flex; align-items: center; gap: 8px; justify-content: space-between;
+  padding: 4px 10px; border-bottom: 1px solid var(--rule); background: var(--paper);
+}
+.console {
+  margin: 0; padding: 8px 10px; min-height: 96px; max-height: none;
+  font-family: var(--f-code); font-size: 15px; line-height: 1.4;
+  white-space: pre-wrap; overflow-wrap: anywhere; color: var(--ink);
+}
+.console .e { color: var(--err); }
+.console .dim { color: var(--muted); font-style: italic; }
+.mini-btn {
+  border: 1px solid var(--rule); border-radius: 6px; background: var(--sheet);
+  font-size: 12px; font-weight: 700; padding: 3px 9px;
+}
+.exit { border-radius: 6px; padding: 9px 11px; flex: none; }
+.exit.ok { background: var(--ok-bg); }
+.exit.err { background: var(--err-bg); }
+.exit.warn { background: var(--warn-bg); }
+.exit-title { margin: 0; font-weight: 800; }
+.exit.ok .exit-title { color: var(--ok); }
+.exit.err .exit-title { color: var(--err); }
+.exit.warn .exit-title { color: var(--warn); }
+.exit p { margin: 3px 0 0; font-size: 14px; }
+.exit code, .hint code, .sheet code { font-family: var(--f-code); font-size: 0.98em; }
+
+.welcome { border: 1px dashed var(--rule-strong); border-radius: var(--radius); padding: 12px 14px; background: var(--sheet); }
+.welcome h2 { margin: 0 0 4px; font-size: 17px; text-wrap: balance; }
+.welcome p { margin: 0 0 6px; color: var(--muted); font-size: 14px; }
+.welcome ul { margin: 6px 0 0; padding-left: 18px; font-size: 14px; }
+.raw { font-size: 13px; color: var(--muted); }
+.raw summary { cursor: pointer; font-weight: 700; padding: 2px 0; }
+.raw pre { margin: 6px 0 0; padding: 8px; border-radius: 4px; background: var(--sheet); border: 1px solid var(--rule); font-family: var(--f-code); font-size: 13px; overflow-x: auto; white-space: pre; color: var(--ink); }
+
+/* ---------- sheet ---------- */
+.scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 20; }
+.sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 21;
+  max-height: 86%; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  background: var(--paper); border-top: 1.5px solid var(--ink);
+  border-radius: 16px 16px 0 0; box-shadow: var(--shadow);
+  padding: 8px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+}
+.sheet-inner { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+.sheet-top { display: flex; align-items: center; justify-content: space-between; position: sticky; top: -8px; background: var(--paper); padding: 8px 0 6px; z-index: 1; }
+.sheet-top h2 { margin: 0; font-family: var(--f-mark); font-stretch: 78%; font-size: 17px; font-weight: 800; }
+.sec { display: flex; flex-direction: column; gap: 8px; }
+.list { display: flex; flex-direction: column; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--sheet); overflow: hidden; }
+.row { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-top: 1px solid var(--rule); min-width: 0; }
+.row:first-child { border-top: 0; }
+.row-main { flex: 1; min-width: 0; text-align: left; border: 0; background: none; padding: 0; }
+.row-title { display: block; font-weight: 700; }
+.row-sub { display: block; font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row .mini-btn.danger { color: var(--err); }
+.save-row { display: flex; gap: 8px; }
+.save-row input {
+  flex: 1; min-width: 0; height: 42px; padding: 0 12px;
+  border: 1px solid var(--rule); border-radius: var(--radius); background: var(--sheet); color: var(--ink);
+  font-family: var(--f-ui); font-size: 16px;
+}
+.btn {
+  height: 42px; padding: 0 16px; border-radius: var(--radius);
+  border: 1.5px solid var(--ink); background: var(--sheet); font-weight: 800;
+}
+.btn.primary { background: var(--marker); color: var(--marker-ink); }
+.opts { display: grid; gap: 10px; }
+.opt { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.opt-label { font-weight: 700; }
+.seg { display: inline-flex; border: 1px solid var(--rule-strong); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; background: var(--sheet); padding: 7px 11px; font-family: var(--f-code); font-size: 15px; border-left: 1px solid var(--rule); }
+.seg button:first-child { border-left: 0; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); font-weight: 700; }
+.about { font-size: 14px; color: var(--muted); }
+.about p { margin: 0 0 6px; max-width: 62ch; }
+.about ul { margin: 0 0 8px; padding-left: 18px; }
+.empty { padding: 10px 12px; color: var(--muted); font-size: 14px; }
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 30;
+  transform: translateX(-50%);
+  display: flex; align-items: center; gap: 12px;
+  max-width: calc(100% - 32px);
+  background: var(--ink); color: var(--paper);
+  border-radius: 10px; padding: 9px 12px 9px 14px; font-weight: 600; font-size: 14px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+.toast button { border: 0; background: var(--marker); color: var(--marker-ink); border-radius: 6px; padding: 4px 10px; font-weight: 800; font-size: 13px; }
+
+.install-strip {
+  display: flex; align-items: center; gap: 10px; flex: none;
+  padding: 8px 8px 8px 12px; border-radius: var(--radius);
+  background: var(--marker-soft); border: 1px solid var(--rule-strong);
+}
+.install-strip p { margin: 0; flex: 1; min-width: 0; font-size: 14px; line-height: 1.35; }
+.ios-share { width: 13px; height: 15px; vertical-align: -2px; }
+.strip-x { flex: none; width: 32px; height: 32px; display: grid; place-items: center; border: 0; background: none; border-radius: 6px; }
+.strip-x svg { width: 12px; height: 12px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+@media (min-width: 700px) {
+  .mark { font-size: 22px; }
+}
+</style>
+
+<div class="app">
+  <header class="bar">
+    <div class="brand">
+      <span class="mark">Pocket C<span class="pp">++</span></span>
+      <button class="status" id="status" data-state="idle" type="button"><span class="dot"></span><span id="statusText">Compiler not downloaded yet</span></button>
+    </div>
+    <button class="icon-btn" id="menuBtn" type="button" aria-label="Programs, examples and settings">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 5.5h14M3 10h14M3 14.5h9"/></svg>
+    </button>
+    <button class="run" id="runBtn" type="button" data-mode="idle">
+      <svg viewBox="0 0 14 14" fill="currentColor" id="runIcon"><path d="M2.5 1.5v11l9.5-5.5z"/></svg>
+      <span id="runLabel">Run</span>
+    </button>
+  </header>
+
+  <div class="install-strip" id="installStrip" hidden>
+    <p>Install it: tap <svg class="ios-share" viewBox="0 0 16 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 11V1.5M4.8 4.5 8 1.3l3.2 3.2"/><path d="M5 7H3.5a1 1 0 0 0-1 1v7.5a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1H11"/></svg> <b>Share</b>, then <b>Add to Home Screen</b>.</p>
+    <button class="strip-x" id="installDismiss" type="button" aria-label="Hide install tip">
+      <svg viewBox="0 0 12 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 2l8 8M10 2l-8 8"/></svg>
+    </button>
+  </div>
+
+  <nav class="tabs" role="tablist" aria-label="Views">
+    <button class="tab" role="tab" id="tab-code" aria-controls="pane-code" aria-selected="true" type="button">Code</button>
+    <button class="tab" role="tab" id="tab-input" aria-controls="pane-input" aria-selected="false" type="button">Input <span class="pill" id="inputPill" hidden></span></button>
+    <button class="tab" role="tab" id="tab-output" aria-controls="pane-output" aria-selected="false" type="button">Output <span class="pill" id="outPill" hidden></span></button>
+  </nav>
+
+  <main class="panes">
+    <section class="pane" id="pane-code" role="tabpanel" aria-labelledby="tab-code">
+      <div class="keys" id="keys" aria-label="Symbol keys"></div>
+      <div class="editor-wrap"><textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="main.cpp"></textarea></div>
+    </section>
+
+    <section class="pane scroll" id="pane-input" role="tabpanel" aria-labelledby="tab-input" hidden>
+      <div class="field-label">
+        <label class="eyebrow" for="stdin">Program input</label>
+        <span class="mono-note">cin &gt;&gt; reads from here</span>
+      </div>
+      <textarea id="stdin" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"></textarea>
+      <p class="hint">Type everything your program will ask for, in order, before you tap Run. Spaces and new lines both separate values. When the input runs out, <code>cin</code> stops reading, just like the end of a file.</p>
+    </section>
+
+    <section class="pane scroll" id="pane-output" role="tabpanel" aria-labelledby="tab-output" hidden>
+      <div id="outputBody"></div>
+    </section>
+  </main>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
+  <div class="sheet-inner">
+    <div class="sheet-top">
+      <h2 id="sheetTitle">Programs &amp; settings</h2>
+      <button class="mini-btn" id="sheetClose" type="button">Done</button>
+    </div>
+
+    <section class="sec" id="shareSec" aria-labelledby="secShare" hidden>
+      <span class="eyebrow" id="secShare">Share</span>
+      <div class="list">
+        <div class="row">
+          <button class="row-main" id="shareBtn" type="button">
+            <span class="row-title">Send Pocket C++ to a classmate</span>
+            <span class="row-sub" id="shareUrl"></span>
+          </button>
+        </div>
+        <div class="row" id="installRow" hidden>
+          <button class="row-main" id="installBtn" type="button">
+            <span class="row-title">Install on this device</span>
+            <span class="row-sub" id="installSub">Opens full screen and works offline</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" aria-labelledby="secSaved">
+      <span class="eyebrow" id="secSaved">My programs</span>
+      <div class="save-row">
+        <input id="saveName" type="text" placeholder="Name this program" maxlength="40" autocapitalize="off" autocomplete="off">
+        <button class="btn primary" id="saveBtn" type="button">Save</button>
+      </div>
+      <div class="list" id="savedList"></div>
+    </section>
+
+    <section class="sec" aria-labelledby="secEx">
+      <span class="eyebrow" id="secEx">Examples</span>
+      <div class="list" id="exampleList"></div>
+    </section>
+
+    <section class="sec" aria-labelledby="secOpts">
+      <span class="eyebrow" id="secOpts">Build settings</span>
+      <div class="opts">
+        <div class="opt"><span class="opt-label">Standard</span><div class="seg" data-opt="std"></div></div>
+        <div class="opt"><span class="opt-label">Optimize</span><div class="seg" data-opt="opt"></div></div>
+        <div class="opt"><span class="opt-label">Warnings</span><div class="seg" data-opt="warn"></div></div>
+        <div class="opt"><span class="opt-label">Time limit</span><div class="seg" data-opt="limit"></div></div>
+      </div>
+    </section>
+
+    <section class="sec about" aria-labelledby="secAbout">
+      <span class="eyebrow" id="secAbout">How it works</span>
+      <p>Your code compiles on this phone with clang 8 and libc++, built for WebAssembly. Nothing is sent to a server. The compiler downloads once (about 19 MB) and is kept for next time.</p>
+      <ul>
+        <li>Input goes in the Input tab before you run. The program can't pause to ask.</li>
+        <li><code>try</code>, <code>catch</code> and <code>throw</code> all work, including errors from <code>stoi</code> and <code>.at()</code>.</li>
+        <li>No threads and no files on disk. Everything else in standard C++17 is fair game.</li>
+      </ul>
+      <p>Compiler build: <a href="https://github.com/binji/wasm-clang" target="_blank" rel="noopener">wasm-clang</a> by Ben Smith (Apache 2.0), from LLVM (Apache 2.0 with LLVM exceptions). <a href="licenses.txt" target="_blank" rel="noopener">Licenses</a></p>
+      <div><button class="mini-btn danger" id="clearCache" type="button">Delete downloaded compiler</button></div>
+    </section>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" hidden><span id="toastText"></span><button id="toastAction" type="button" hidden>Undo</button></div>
+
+<script src="editor.js"></script>
+<script>
+(() => {
+'use strict';
+const $ = (s) => document.querySelector(s);
+
+// ---------------------------------------------------------------- storage
+const store = {
+  get(key, fallback) {
+    try { const v = localStorage.getItem('pocketcpp.' + key); return v == null ? fallback : JSON.parse(v); }
+    catch (e) { return fallback; }
+  },
+  set(key, value) {
+    try { localStorage.setItem('pocketcpp.' + key, JSON.stringify(value)); } catch (e) {}
+  },
+};
+
+// ---------------------------------------------------------------- examples
+const EXAMPLES = [
+  {
+    id: 'scores', title: 'Vectors and sort', sub: 'Read scores, sort them, find the average',
+    input: '6\n88 92 75 100 64 81\n',
+    code: `#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <iomanip>
+using namespace std;
+
+int main() {
+    int n;
+    cin >> n;                     // how many scores
+    vector<int> scores(n);
+    for (int& s : scores) cin >> s;
+
+    sort(scores.begin(), scores.end());
+    double sum = 0;
+    for (int s : scores) sum += s;
+
+    cout << "Sorted:";
+    for (int s : scores) cout << " " << s;
+    cout << "\\nLowest:  " << scores.front();
+    cout << "\\nHighest: " << scores.back();
+    cout << fixed << setprecision(2);
+    cout << "\\nAverage: " << sum / n << endl;
+    return 0;
+}
+`,
+  },
+  {
+    id: 'hello', title: 'Hello, input', sub: 'cin with a string and a number',
+    input: 'Ada\n2004\n',
+    code: `#include <iostream>
+#include <string>
+using namespace std;
+
+int main() {
+    string name;
+    int year;
+
+    cout << "What's your name? ";
+    cin >> name;
+    cout << "What year were you born? ";
+    cin >> year;
+
+    cout << "\\nHi " << name << "! You turn "
+         << (2026 - year) << " this year." << endl;
+    return 0;
+}
+`,
+  },
+  {
+    id: 'bank', title: 'A class', sub: 'BankAccount with private data and methods',
+    input: '',
+    code: `#include <iostream>
+#include <string>
+using namespace std;
+
+class BankAccount {
+public:
+    BankAccount(string owner, double balance)
+        : owner(owner), balance(balance) {}
+
+    void deposit(double amount) { balance += amount; }
+
+    bool withdraw(double amount) {
+        if (amount > balance) return false;
+        balance -= amount;
+        return true;
+    }
+
+    void print() const {
+        cout << owner << " has $" << balance << endl;
+    }
+
+private:
+    string owner;
+    double balance;
+};
+
+int main() {
+    BankAccount acct("Ada", 50.0);
+    acct.deposit(25.5);
+    acct.print();
+
+    if (!acct.withdraw(100))
+        cout << "Not enough money for that!" << endl;
+
+    acct.withdraw(30);
+    acct.print();
+    return 0;
+}
+`,
+  },
+  {
+    id: 'list', title: 'Linked list', sub: 'Nodes, pointers, new and delete',
+    input: '',
+    code: `#include <iostream>
+using namespace std;
+
+struct Node {
+    int value;
+    Node* next;
+};
+
+// Add a value to the front of the list.
+void push(Node*& head, int value) {
+    head = new Node{value, head};
+}
+
+void print(const Node* head) {
+    for (const Node* p = head; p != nullptr; p = p->next)
+        cout << p->value << " -> ";
+    cout << "null" << endl;
+}
+
+void freeAll(Node*& head) {
+    while (head != nullptr) {
+        Node* old = head;
+        head = head->next;
+        delete old;
+    }
+}
+
+int main() {
+    Node* head = nullptr;
+    for (int i = 1; i <= 5; i++) push(head, i * 10);
+    print(head);
+
+    freeAll(head);
+    print(head);
+    return 0;
+}
+`,
+  },
+  {
+    id: 'stack', title: 'Template class', sub: 'A Stack<T> that reverses your words',
+    input: 'stacks are last in first out\n',
+    code: `#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+template <typename T>
+class Stack {
+public:
+    void push(const T& item) { items.push_back(item); }
+
+    T pop() {
+        T top = items.back();
+        items.pop_back();
+        return top;
+    }
+
+    bool empty() const { return items.empty(); }
+    size_t size() const { return items.size(); }
+
+private:
+    vector<T> items;
+};
+
+int main() {
+    Stack<string> words;
+    string w;
+    while (cin >> w) words.push(w);   // stops when input runs out
+
+    cout << "Read " << words.size() << " words. Backwards:\\n";
+    while (!words.empty()) cout << words.pop() << " ";
+    cout << endl;
+    return 0;
+}
+`,
+  },
+  {
+    id: 'recursion', title: 'Recursion', sub: 'Factorial and Fibonacci, base cases first',
+    input: '',
+    code: `#include <iostream>
+using namespace std;
+
+long long factorial(int n) {
+    if (n <= 1) return 1;            // base case
+    return n * factorial(n - 1);     // recursive case
+}
+
+int fib(int n) {
+    return n < 2 ? n : fib(n - 1) + fib(n - 2);
+}
+
+int main() {
+    for (int i = 0; i <= 10; i++) {
+        cout << i << "! = " << factorial(i)
+             << "   fib(" << i << ") = " << fib(i) << endl;
+    }
+    return 0;
+}
+`,
+  },
+  {
+    id: 'exceptions', title: 'try and catch', sub: 'Check input with stoi and your own exception',
+    input: 'twelve\n-5\n17\n',
+    code: `#include <iostream>
+#include <string>
+#include <stdexcept>
+using namespace std;
+
+// A custom exception: inherit from a standard one.
+class NegativeAge : public out_of_range {
+public:
+    NegativeAge(int age)
+        : out_of_range("age can't be negative: " + to_string(age)) {}
+};
+
+int parseAge(const string& text) {
+    int age = stoi(text);          // throws invalid_argument on "twelve"
+    if (age < 0) throw NegativeAge(age);
+    return age;
+}
+
+int main() {
+    string line;
+    while (cin >> line) {
+        try {
+            int age = parseAge(line);
+            cout << "OK, age " << age << endl;
+        } catch (const invalid_argument&) {
+            cout << "Not a number: " << line << endl;
+        } catch (const out_of_range& e) {
+            cout << "Rejected: " << e.what() << endl;
+        }
+    }
+    return 0;
+}
+`,
+  },
+];
+
+// ---------------------------------------------------------------- settings
+const OPTIONS = {
+  std: { values: ['c++11', 'c++14', 'c++17'], labels: ['11', '14', '17'], def: 'c++17' },
+  opt: { values: ['-O0', '-O1', '-O2'], labels: ['-O0', '-O1', '-O2'], def: '-O1' },
+  warn: { values: ['on', 'off'], labels: ['-Wall', 'off'], def: 'on' },
+  limit: { values: [5, 10, 30], labels: ['5 s', '10 s', '30 s'], def: 10 },
+};
+const settings = Object.assign(
+  Object.fromEntries(Object.entries(OPTIONS).map(([k, o]) => [k, o.def])),
+  store.get('settings', {})
+);
+for (const k of Object.keys(OPTIONS)) {
+  if (!OPTIONS[k].values.includes(settings[k])) settings[k] = OPTIONS[k].def;
+}
+function buildFlags() {
+  const f = ['-std=' + settings.std, settings.opt, '-fcxx-exceptions', '-fexceptions'];
+  if (settings.warn === 'on') f.push('-Wall');
+  return f;
+}
+function flagText() {
+  return ['-std=' + settings.std, settings.opt].concat(settings.warn === 'on' ? ['-Wall'] : []).join(' ');
+}
+
+// ---------------------------------------------------------------- editor
+const draft = store.get('draft', null);
+const startCode = draft && typeof draft.code === 'string' ? draft.code : EXAMPLES[0].code;
+const startInput = draft && typeof draft.input === 'string' ? draft.input : EXAMPLES[0].input;
+const codeTa = $('#code');
+codeTa.value = startCode;
+
+const editor = (() => {
+  if (window.CodeMirror) {
+    const cm = CodeMirror.fromTextArea(codeTa, {
+      mode: 'text/x-c++src',
+      lineNumbers: true,
+      indentUnit: 4,
+      tabSize: 4,
+      indentWithTabs: false,
+      matchBrackets: true,
+      autoCloseBrackets: true,
+      spellcheck: false,
+      autocorrect: false,
+      autocapitalize: false,
+      viewportMargin: 20,
+      extraKeys: { Tab: (c) => c.somethingSelected() ? c.indentSelection('add') : c.replaceSelection('    ') },
+    });
+    let marks = [];
+    return {
+      get: () => cm.getValue(),
+      set: (v) => { cm.setValue(v); cm.clearHistory(); },
+      insert: (t) => { cm.replaceSelection(t); cm.focus(); },
+      tab: () => { if (cm.somethingSelected()) cm.indentSelection('add'); else cm.replaceSelection('    '); cm.focus(); },
+      move: (d) => { cm.execCommand(d < 0 ? 'goCharLeft' : 'goCharRight'); cm.focus(); },
+      undo: () => { cm.undo(); cm.focus(); },
+      onChange: (f) => cm.on('change', f),
+      onFocus: (f) => cm.on('focus', f),
+      refresh: () => cm.refresh(),
+      jump: (line, col) => {
+        const l = Math.max(0, Math.min(cm.lineCount() - 1, line - 1));
+        cm.setCursor({ line: l, ch: Math.max(0, col - 1) });
+        cm.scrollIntoView({ line: l, ch: 0 }, 80);
+        const h = cm.addLineClass(l, 'background', 'line-flash');
+        setTimeout(() => cm.removeLineClass(h, 'background', 'line-flash'), 900);
+        cm.focus();
+      },
+      markLines: (list) => {
+        for (const m of marks) cm.removeLineClass(m.h, 'background', m.cls);
+        marks = [];
+        for (const { line, sev } of list) {
+          if (line < 1 || line > cm.lineCount()) continue;
+          const cls = sev === 'error' ? 'line-error' : 'line-warning';
+          marks.push({ h: cm.addLineClass(line - 1, 'background', cls), cls });
+        }
+      },
+    };
+  }
+  // Plain textarea if the editor library could not load.
+  const ta = codeTa;
+  return {
+    get: () => ta.value,
+    set: (v) => { ta.value = v; },
+    insert: (t) => {
+      const s = ta.selectionStart, e = ta.selectionEnd;
+      ta.setRangeText(t, s, e, 'end'); ta.focus(); ta.dispatchEvent(new Event('input'));
+    },
+    tab() { this.insert('    '); },
+    move: (d) => { const p = Math.max(0, ta.selectionStart + d); ta.setSelectionRange(p, p); ta.focus(); },
+    undo: () => { ta.focus(); try { document.execCommand('undo'); } catch (e) {} },
+    onChange: (f) => ta.addEventListener('input', f),
+    onFocus: (f) => ta.addEventListener('focus', f),
+    refresh: () => {},
+    jump: (line) => {
+      const lines = ta.value.split('\n');
+      let pos = 0;
+      for (let i = 0; i < Math.min(line - 1, lines.length); i++) pos += lines[i].length + 1;
+      ta.focus(); ta.setSelectionRange(pos, pos);
+    },
+    markLines: () => {},
+  };
+})();
+
+// ---------------------------------------------------------------- key row
+const KEYS = [
+  ['⇥', 'tab', 'Indent', true], ['←', 'left', 'Cursor left'], ['→', 'right', 'Cursor right'],
+  [';'], ['{'], ['}'], ['('], [')'], ['<<'], ['>>'], ['"'], ["'"], ['<'], ['>'],
+  ['['], [']'], ['='], ['&'], ['*'], ['::'], ['#'], ['+'], ['-'], ['/'], ['!'], ['|'], ['%'], ['\\'],
+  ['Undo', 'undo', 'Undo', true],
+];
+const keysEl = $('#keys');
+for (const [label, action, aria, wide] of KEYS) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'key' + (wide && label.length > 1 ? ' wide' : '');
+  b.textContent = label;
+  if (aria) b.setAttribute('aria-label', aria);
+  const act = () => {
+    if (action === 'tab') editor.tab();
+    else if (action === 'left') editor.move(-1);
+    else if (action === 'right') editor.move(1);
+    else if (action === 'undo') editor.undo();
+    else editor.insert(label);
+  };
+  // Keep the keyboard open: don't let the tap move focus off the editor.
+  b.addEventListener('pointerdown', (e) => e.preventDefault());
+  b.addEventListener('mousedown', (e) => e.preventDefault());
+  b.addEventListener('click', act);
+  keysEl.appendChild(b);
+}
+
+// ---------------------------------------------------------------- input
+const stdinEl = $('#stdin');
+stdinEl.value = startInput;
+function updateInputPill() {
+  const n = stdinEl.value.trim() ? stdinEl.value.trim().split(/\s+/).length : 0;
+  const pill = $('#inputPill');
+  pill.hidden = n === 0;
+  pill.textContent = n;
+  pill.title = n + ' values';
+}
+updateInputPill();
+
+let saveTimer = null;
+function saveDraftSoon() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveDraft, 400);
+}
+function saveDraft() { store.set('draft', { code: editor.get(), input: stdinEl.value }); }
+editor.onChange(() => { saveDraftSoon(); editor.markLines([]); });
+stdinEl.addEventListener('input', () => { saveDraftSoon(); updateInputPill(); });
+window.addEventListener('pagehide', saveDraft);
+
+// ---------------------------------------------------------------- tabs
+const tabs = ['code', 'input', 'output'];
+function showTab(name) {
+  for (const t of tabs) {
+    $('#tab-' + t).setAttribute('aria-selected', String(t === name));
+    $('#pane-' + t).hidden = t !== name;
+  }
+  if (name === 'code') requestAnimationFrame(() => editor.refresh());
+  store.set('tab', name);
+}
+for (const t of tabs) $('#tab-' + t).addEventListener('click', () => showTab(t));
+
+// ---------------------------------------------------------------- toast
+let toastTimer = null;
+function toast(text, actionLabel, onAction) {
+  const el = $('#toast');
+  $('#toastText').textContent = text;
+  const btn = $('#toastAction');
+  btn.hidden = !actionLabel;
+  btn.textContent = actionLabel || '';
+  btn.onclick = () => { el.hidden = true; if (onAction) onAction(); };
+  el.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.hidden = true; }, actionLabel ? 6000 : 2600);
+}
+
+// ---------------------------------------------------------------- helpers
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+function fmtMB(bytes) { return (bytes / 1048576).toFixed(1); }
+function fmtTime(ms) { return ms < 1000 ? Math.round(ms) + ' ms' : (ms / 1000).toFixed(2) + ' s'; }
+
+// Small Itanium demangler for linker messages: _Z3addii -> add(int, int)
+const BUILTIN = { v: 'void', b: 'bool', c: 'char', a: 'signed char', h: 'unsigned char', s: 'short',
+  t: 'unsigned short', i: 'int', j: 'unsigned', l: 'long', m: 'unsigned long', x: 'long long',
+  y: 'unsigned long long', f: 'float', d: 'double', e: 'long double' };
+function demangle(sym) {
+  if (!/^_Z/.test(sym)) return sym;
+  try {
+    let p = 2;
+    const readName = () => {
+      const m = /^(\d+)/.exec(sym.slice(p));
+      if (!m) return null;
+      p += m[1].length;
+      const n = sym.substr(p, +m[1]);
+      p += +m[1];
+      return n;
+    };
+    let name;
+    if (sym[p] === 'N') {
+      p++;
+      if (sym[p] === 'K') p++;
+      const parts = [];
+      while (p < sym.length && sym[p] !== 'E') {
+        if (sym[p] === 'C' && /[123]/.test(sym[p + 1])) { parts.push(parts[parts.length - 1]); p += 2; continue; }
+        if (sym[p] === 'D' && /[012]/.test(sym[p + 1])) { parts.push('~' + parts[parts.length - 1]); p += 2; continue; }
+        const n = readName();
+        if (n == null) return sym;
+        parts.push(n);
+      }
+      p++;
+      name = parts.join('::');
+    } else {
+      name = readName();
+      if (name == null) return sym;
+    }
+    const params = [];
+    while (p < sym.length) {
+      let prefix = '', suffix = '';
+      while (/[PRK]/.test(sym[p])) {
+        if (sym[p] === 'K') prefix = 'const ' + prefix;
+        else suffix = (sym[p] === 'P' ? '*' : '&') + suffix;
+        p++;
+      }
+      let t;
+      if (BUILTIN[sym[p]]) { t = BUILTIN[sym[p]]; p++; }
+      else if (/\d/.test(sym[p])) t = readName();
+      else if (sym.startsWith('NSt3__212basic_string', p)) { t = 'std::string'; p = sym.length; }
+      else { params.push('…'); break; }
+      params.push(prefix + t + suffix);
+    }
+    const list = params.length === 1 && params[0] === 'void' ? '' : params.join(', ');
+    return `${name}(${list})`;
+  } catch (e) { return sym; }
+}
+
+// ---------------------------------------------------------------- diagnostics
+const DIAG_RE = /^(.*?):(\d+):(\d+): (fatal error|error|warning|note): (.*)$/;
+function parseDiagnostics(log) {
+  const items = [];
+  let target = null;
+  for (const raw of log.replace(/\r/g, '').split('\n')) {
+    const line = raw.replace(/\u001b\[[0-9;]*m/g, '');
+    const m = DIAG_RE.exec(line);
+    if (m) {
+      const d = { file: m[1], line: +m[2], col: +m[3], sev: m[4] === 'fatal error' ? 'error' : m[4], msg: m[5], snippet: [], notes: [] };
+      if (d.sev === 'note' && items.length) items[items.length - 1].notes.push(d);
+      else items.push(d);
+      target = d;
+      continue;
+    }
+    if (/^In file included from/.test(line) || /^\s+from /.test(line)) continue;
+    if (/^\d+ (error|warning)s? (and \d+ (error|warning)s? )?generated\.$/.test(line)) continue;
+    if (/^Error: process exited/.test(line)) continue;
+    if (target && line.trim() !== '') target.snippet.push(line);
+  }
+  return items;
+}
+
+function parseLinkErrors(log) {
+  const out = [];
+  for (const line of log.split('\n')) {
+    const m = /error: .*?undefined symbol: (.+?)\s*$/.exec(line);
+    if (m) {
+      const sym = m[1];
+      if (sym === 'main') {
+        out.push({ sev: 'error', msg: 'Your program has no main() function.', tip: 'Every program starts at <b>int main()</b>. Check its spelling.' });
+      } else {
+        const pretty = /^_Z/.test(sym) ? demangle(sym) : sym;
+        out.push({ sev: 'error', msg: `Linker: ${pretty} is declared but never defined.`,
+          tip: 'Write the body for it, or check that the definition has exactly the same name and parameter types.' });
+      }
+    } else if (/error:/.test(line)) {
+      out.push({ sev: 'error', msg: line.replace(/^wasm-ld: /, 'Linker: ') });
+    }
+  }
+  return out;
+}
+
+const TIPS = [
+  [/expected ';'/, 'Add a <b>;</b> at the end of the statement.'],
+  [/use of undeclared identifier '(cout|cin|endl|cerr)'/, 'Add <b>#include &lt;iostream&gt;</b> and <b>using namespace std;</b> (or write <b>std::cout</b>).'],
+  [/(unknown type name|use of undeclared identifier) 'string'/, 'Add <b>#include &lt;string&gt;</b> and <b>using namespace std;</b>.'],
+  [/no template named 'vector'|use of undeclared identifier 'vector'/, 'Add <b>#include &lt;vector&gt;</b>.'],
+  [/expected '\}'/, 'A <b>{</b> is missing its closing <b>}</b>. Count your braces.'],
+  [/use of undeclared identifier/, 'Check the spelling, and make sure it is declared above this line or inside this scope.'],
+  [/variable '.*' is uninitialized when used|is used uninitialized/, 'Give the variable a starting value when you declare it.'],
+  [/unused variable/, 'Not an error. Delete the variable if you don\'t need it.'],
+  [/control reaches end of non-void function|non-void function does not return/, 'Every path through this function needs a <b>return</b> value.'],
+];
+function tipFor(msg) {
+  for (const [re, tip] of TIPS) if (re.test(msg)) return tip;
+  return '';
+}
+
+// ---------------------------------------------------------------- runtime errors
+function explainCrash(r) {
+  const m = (r.message || '') + ' ' + (r.name || '');
+  if (/divide by zero|division by zero/i.test(m))
+    return ['Crashed: integer division by zero', 'Something was divided (or <code>%</code>) by 0. Check the divisor before dividing.'];
+  if (/out of bounds|memory access/i.test(m))
+    return ['Crashed: memory access out of bounds', 'Usually an array index past the end, a null or dangling pointer, or using memory after <code>delete</code>.'];
+  if (/call stack|stack size|too much recursion|RangeError/i.test(m))
+    return ['Crashed: stack overflow', 'Recursion that never reaches its base case, or a very large local array.'];
+  if (/unreachable/i.test(m))
+    return ['Program aborted', 'Something called <code>abort()</code>, usually a failed <code>assert</code>.'];
+  if (/float unrepresentable|integer overflow|invalid conversion/i.test(m))
+    return ['Crashed: number too big to convert', 'A floating-point value didn\'t fit in an integer type.'];
+  if (/indirect call|signature|table/i.test(m))
+    return ['Crashed: bad function call', 'Often a call through a deleted object or an uninitialized function pointer.'];
+  return ['Crashed', esc(r.message || 'The program stopped unexpectedly.')];
+}
+
+// ---------------------------------------------------------------- compiler worker
+const status = $('#status');
+const statusText = $('#statusText');
+let compilerWorker = null;
+let compilerReady = null;
+let compilerResolve = null, compilerReject = null;
+let progress = { loaded: 0, total: 0 };
+let buildCallbacks = new Map();
+let compilerState = 'idle';
+
+function setStatus(state, text) {
+  compilerState = state;
+  status.dataset.state = state;
+  statusText.textContent = text;
+  updateProgressUI();
+}
+
+function ensureCompiler() {
+  if (compilerReady) return compilerReady;
+  compilerReady = new Promise((res, rej) => { compilerResolve = res; compilerReject = rej; });
+  compilerReady.catch(() => {});
+  try {
+    compilerWorker = new Worker('compiler-worker.js');
+  } catch (err) {
+    failCompiler('This page could not start its compiler worker.');
+    return compilerReady;
+  }
+  compilerWorker.onmessage = (e) => {
+    const m = e.data;
+    if (m.type === 'progress') {
+      progress = m;
+      setStatus('loading', `Downloading compiler ${Math.floor((m.loaded / m.total) * 100)}%`);
+    } else if (m.type === 'preparing') {
+      setStatus('preparing', 'Preparing compiler…');
+    } else if (m.type === 'ready') {
+      setStatus('ready', 'clang 8 ready · on device');
+      compilerResolve();
+    } else if (m.type === 'fatal') {
+      failCompiler(m.message);
+    } else if (m.type === 'built') {
+      const cb = buildCallbacks.get(m.id);
+      buildCallbacks.delete(m.id);
+      if (cb) cb(m);
+    }
+  };
+  compilerWorker.onerror = (e) => { failCompiler((e && e.message) || 'The compiler worker stopped.'); };
+  setStatus('loading', 'Downloading compiler 0%');
+  compilerWorker.postMessage({ type: 'init' });
+  ensureRunner().postMessage({ type: 'warm' });
+  return compilerReady;
+}
+
+function failCompiler(message) {
+  setStatus('error', 'Compiler failed to load · tap to retry');
+  if (compilerReject) compilerReject(new Error(message));
+  if (compilerWorker) compilerWorker.terminate();
+  compilerWorker = null;
+  compilerReady = null;
+  for (const cb of buildCallbacks.values()) cb({ ok: false, fatal: message });
+  buildCallbacks.clear();
+}
+
+status.addEventListener('click', () => {
+  if (compilerState === 'idle' || compilerState === 'error') { ensureCompiler(); toast('Downloading the compiler'); }
+  else openSheet();
+});
+
+let warmed = false;
+editor.onFocus(() => { if (!warmed) { warmed = true; ensureCompiler(); } });
+
+// ---------------------------------------------------------------- runner worker
+let runnerWorker = null;
+let runnerHandler = null;
+function ensureRunner() {
+  if (runnerWorker) return runnerWorker;
+  runnerWorker = new Worker('runner-worker.js');
+  runnerWorker.onmessage = (e) => { if (runnerHandler) runnerHandler(e.data); };
+  runnerWorker.onerror = (e) => { if (runnerHandler) runnerHandler({ type: 'done', kind: 'crash', name: 'Error', message: (e && e.message) || 'runner stopped', ms: 0 }); };
+  return runnerWorker;
+}
+function killRunner() {
+  if (runnerWorker) runnerWorker.terminate();
+  runnerWorker = null;
+  runnerHandler = null;
+}
+
+// ---------------------------------------------------------------- output view
+const out = $('#outputBody');
+const runBtn = $('#runBtn');
+const runLabel = $('#runLabel');
+const runIcon = $('#runIcon');
+const outPill = $('#outPill');
+let buildNo = store.get('buildNo', 0);
+let busy = 'idle';    // idle | building | running
+
+function setRunMode(mode) {
+  busy = mode;
+  runBtn.dataset.mode = mode;
+  runBtn.disabled = mode === 'building';
+  if (mode === 'running') {
+    runLabel.textContent = 'Stop';
+    runIcon.innerHTML = '<rect x="2.5" y="2.5" width="9" height="9" rx="1"/>';
+  } else if (mode === 'building') {
+    runLabel.textContent = 'Building';
+    runIcon.innerHTML = '<circle cx="7" cy="7" r="2.5"/>';
+  } else {
+    runLabel.textContent = 'Run';
+    runIcon.innerHTML = '<path d="M2.5 1.5v11l9.5-5.5z"/>';
+  }
+}
+
+function setOutPill(text, kind) {
+  outPill.hidden = !text;
+  outPill.textContent = text || '';
+  outPill.className = 'pill' + (kind ? ' ' + kind : '');
+}
+
+function renderWelcome() {
+  out.innerHTML = `
+    <div class="welcome">
+      <h2>Tap Run to compile main.cpp</h2>
+      <p>The first run downloads the compiler (about 19 MB) and keeps it on this phone. After that, builds take a second or two.</p>
+      <ul>
+        <li>Errors show up here. Tap one to jump to that line.</li>
+        <li>Put what <code>cin</code> should read in the Input tab.</li>
+        <li>Examples and saved programs live under the menu button.</li>
+      </ul>
+    </div>`;
+}
+
+function titleBlock(result, resultClass, extra) {
+  return `
+    <div class="titleblock">
+      <div class="tb-cell"><span class="tb-k">Build</span><span class="tb-v">#${String(buildNo).padStart(2, '0')} · main.cpp</span></div>
+      <div class="tb-cell"><span class="tb-k">Result</span><span class="tb-v result ${resultClass}" id="tbResult">${result}</span></div>
+      <div class="tb-cell span"><span class="tb-k">clang 8.0.1 · wasm32</span><span class="tb-v">${esc(flagText())}</span>${extra || ''}</div>
+    </div>`;
+}
+
+function updateProgressUI() {
+  const meter = document.getElementById('dlMeter');
+  const label = document.getElementById('tbResult');
+  if (!meter || !label || busy !== 'building') return;
+  if (compilerState === 'loading' && progress.total) {
+    meter.style.width = ((progress.loaded / progress.total) * 100).toFixed(1) + '%';
+    label.textContent = `Downloading ${fmtMB(progress.loaded)} / ${fmtMB(progress.total)} MB`;
+  } else if (compilerState === 'preparing') {
+    meter.style.width = '100%';
+    label.textContent = 'Preparing compiler…';
+  } else if (compilerState === 'ready') {
+    meter.parentElement.hidden = true;
+    label.textContent = 'Compiling…';
+  }
+}
+
+function renderDiag(d, i) {
+  const jumpable = d.file === 'main.cpp' && d.line > 0;
+  const tip = d.tip || tipFor(d.msg);
+  const tag = jumpable ? 'button' : 'div';
+  const loc = d.line ? `Line ${d.line}${d.col ? ', col ' + d.col : ''}${d.file && d.file !== 'main.cpp' ? ' · ' + esc(d.file.replace(/^\/include\//, '')) : ''}` : '';
+  const notes = (d.notes || []).filter((n) => n.msg);
+  return `
+    <${tag} class="diag ${d.sev}" ${jumpable ? `type="button" data-line="${d.line}" data-col="${d.col}"` : ''}>
+      <span class="diag-head"><span class="sev">${d.sev}</span>${loc ? `<span class="loc">${loc}</span>` : ''}${jumpable ? '<span class="jump">Go to line</span>' : ''}</span>
+      <p class="diag-msg">${esc(d.msg)}</p>
+      ${tip ? `<p class="diag-tip">${tip}</p>` : ''}
+      ${d.snippet && d.snippet.length ? `<pre class="snippet">${esc(d.snippet.join('\n'))}</pre>` : ''}
+      ${notes.length ? `<details class="notes"><summary>${notes.length} note${notes.length > 1 ? 's' : ''}</summary>${notes.slice(0, 8).map((n) => `<p>${n.line && n.file === 'main.cpp' ? 'Line ' + n.line + ': ' : ''}${esc(n.msg)}</p>`).join('')}</details>` : ''}
+    </${tag}>`;
+}
+
+out.addEventListener('click', (e) => {
+  const b = e.target.closest('.diag[data-line]');
+  if (!b) return;
+  showTab('code');
+  setTimeout(() => editor.jump(+b.dataset.line, +b.dataset.col), 30);
+});
+
+// ---------------------------------------------------------------- run
+let buildSeq = 0;
+let runTimer = null;
+
+async function onRun() {
+  if (busy === 'running') { stopProgram('Stopped.'); return; }
+  if (busy === 'building') return;
+  saveDraft();
+  buildNo += 1;
+  store.set('buildNo', buildNo);
+  setRunMode('building');
+  setOutPill('', '');
+  showTab('output');
+  editor.markLines([]);
+  out.innerHTML = titleBlock('Compiling…', '', '<div class="meter"><i id="dlMeter"></i></div>');
+  const needsDownload = compilerState !== 'ready';
+  if (!needsDownload) document.getElementById('dlMeter').parentElement.hidden = true;
+  ensureCompiler();
+  updateProgressUI();
+  try {
+    await compilerReady;
+  } catch (err) {
+    setRunMode('idle');
+    out.innerHTML = titleBlock('Compiler unavailable', 'err') + `
+      <div class="exit err"><p class="exit-title">The compiler didn't load</p>
+      <p>${esc(err.message)}</p><p>Check your connection and tap Run to try again.</p></div>`;
+    setOutPill('!', 'err');
+    return;
+  }
+  updateProgressUI();
+  const id = ++buildSeq;
+  const code = editor.get();
+  const result = await new Promise((resolve) => {
+    buildCallbacks.set(id, resolve);
+    compilerWorker.postMessage({ type: 'build', id, code, flags: buildFlags() });
+  });
+  showBuild(result, code);
+}
+
+function showBuild(r, code) {
+  if (r.fatal) {
+    setRunMode('idle');
+    out.innerHTML = titleBlock('Compiler unavailable', 'err') + `<div class="exit err"><p class="exit-title">The compiler stopped</p><p>${esc(r.fatal)}</p></div>`;
+    return;
+  }
+  const diags = parseDiagnostics(r.compileLog || '');
+  const errors = diags.filter((d) => d.sev === 'error');
+  const warnings = diags.filter((d) => d.sev === 'warning');
+  const linkErrors = r.stage === 'link' ? parseLinkErrors(r.linkLog || '') : [];
+  editor.markLines(diags.filter((d) => d.file === 'main.cpp').map((d) => ({ line: d.line, sev: d.sev })));
+  const rawLog = (r.compileLog || '') + (r.linkLog || '');
+  const raw = rawLog.trim() ? `<details class="raw"><summary>Full compiler output</summary><pre>${esc(rawLog.replace(/\u001b\[[0-9;]*m/g, '').replace(/Error: process exited with code \d+\.\n?/g, '').trim())}</pre></details>` : '';
+
+  if (!r.ok) {
+    setRunMode('idle');
+    let html;
+    if (r.crash) {
+      html = titleBlock('Compiler crashed', 'err') + `<div class="exit err"><p class="exit-title">The compiler itself crashed</p><p>${esc(r.crash)}</p><p>Try a smaller program, or reload the page.</p></div>`;
+    } else if (r.stage === 'link') {
+      const list = linkErrors.length ? linkErrors : [{ sev: 'error', msg: 'The linker failed.' }];
+      html = titleBlock(`Link error${list.length > 1 ? 's' : ''}`, 'err') +
+        `<div class="diags">${list.map(renderDiag).join('')}${warnings.map(renderDiag).join('')}</div>`;
+    } else {
+      const n = errors.length || 1;
+      html = titleBlock(`${n} error${n > 1 ? 's' : ''}${warnings.length ? `, ${warnings.length} warning${warnings.length > 1 ? 's' : ''}` : ''}`, 'err') +
+        `<div class="diags">${(errors.length ? errors : diags).map(renderDiag).join('')}${warnings.map(renderDiag).join('')}</div>`;
+    }
+    out.innerHTML = html + raw;
+    setOutPill(String(errors.length || linkErrors.length || 1), 'err');
+    return;
+  }
+
+  const res = warnings.length ? `Compiled · ${warnings.length} warning${warnings.length > 1 ? 's' : ''}` : 'Compiled';
+  out.innerHTML = titleBlock(res, warnings.length ? 'warn' : 'ok') +
+    `<div class="tb-time" hidden></div>` +
+    (warnings.length ? `<details class="raw"><summary>${warnings.length} warning${warnings.length > 1 ? 's' : ''} (the program still ran)</summary><div class="diags" style="margin-top:8px">${warnings.map(renderDiag).join('')}</div></details>` : '') +
+    `<div class="console-box">
+       <div class="console-head"><span class="eyebrow">Program output</span><button class="mini-btn" id="copyOut" type="button">Copy</button></div>
+       <pre class="console" id="console" aria-live="polite"><span class="dim">Starting…</span></pre>
+     </div>
+     <div id="exitBox"></div>`;
+  $('#tbResult').textContent = `${res} in ${fmtTime(r.ms)}`;
+  $('#copyOut').addEventListener('click', copyOutput);
+  startProgram(r.wasm, code);
+}
+
+let consoleStarted = false;
+function appendOutput(text, fd) {
+  const el = document.getElementById('console');
+  if (!el) return;
+  if (!consoleStarted) { el.textContent = ''; consoleStarted = true; }
+  const pane = $('#pane-output');
+  const nearBottom = pane.scrollHeight - pane.scrollTop - pane.clientHeight < 60;
+  if (fd === 2) {
+    const s = document.createElement('span');
+    s.className = 'e';
+    s.textContent = text;
+    el.appendChild(s);
+  } else {
+    const last = el.lastChild;
+    if (last && last.nodeType === 3) last.appendData(text);
+    else el.appendChild(document.createTextNode(text));
+  }
+  if (nearBottom) pane.scrollTop = pane.scrollHeight;
+}
+
+function copyOutput() {
+  const el = document.getElementById('console');
+  if (!el) return;
+  const text = el.textContent;
+  const done = () => toast('Output copied');
+  try {
+    navigator.clipboard.writeText(text).then(done, () => selectNode(el));
+  } catch (e) { selectNode(el); }
+}
+function selectNode(el) {
+  const r = document.createRange();
+  r.selectNodeContents(el);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(r);
+  toast('Selected. Use Copy from the menu.');
+}
+
+function startProgram(wasm, code) {
+  setRunMode('running');
+  consoleStarted = false;
+  const worker = ensureRunner();
+  const limit = settings.limit * 1000;
+  const usesCin = /\bcin\b|\bscanf\b|\bgetline\b|\bgetchar\b/.test(code);
+  const noInput = usesCin && !stdinEl.value.trim();
+  runnerHandler = (m) => {
+    if (m.type === 'started') {
+      clearTimeout(runTimer);
+      runTimer = setTimeout(() => stopProgram(`Stopped after ${settings.limit} s.`, true), limit);
+    } else if (m.type === 'out') {
+      appendOutput(m.text, m.fd);
+    } else if (m.type === 'done') {
+      clearTimeout(runTimer);
+      runnerHandler = null;
+      finishProgram(m, noInput);
+    }
+  };
+  worker.postMessage({ type: 'run', wasm, stdin: stdinEl.value }, [wasm]);
+}
+
+function finishProgram(m, noInput) {
+  setRunMode('idle');
+  const el = document.getElementById('console');
+  if (el && !consoleStarted) { el.innerHTML = '<span class="dim">(no output)</span>'; consoleStarted = true; }
+  const box = document.getElementById('exitBox');
+  if (!box) return;
+  let html;
+  const inputNote = noInput ? '<p>Your program reads input, but the Input tab is empty, so every <code>cin</code> came back with nothing.</p>' : '';
+  if (m.kind === 'exit' && m.code === 0) {
+    html = `<div class="exit ok"><p class="exit-title">Exited with code 0 · ran in ${fmtTime(m.ms)}</p>${inputNote}</div>`;
+    setOutPill('✓', 'ok');
+  } else if (m.kind === 'exit') {
+    html = `<div class="exit warn"><p class="exit-title">Exited with code ${m.code} · ran in ${fmtTime(m.ms)}</p><p>A nonzero code usually means <code>return 1;</code> or <code>exit(1)</code> ran to signal a problem.</p>${inputNote}</div>`;
+    setOutPill(String(m.code), 'err');
+  } else if (m.kind === 'throw') {
+    const d = m.detail || {};
+    html = `<div class="exit err"><p class="exit-title">Uncaught exception: ${esc(d.type || 'unknown')}</p>
+      ${d.value ? `<p>Message: <code>${esc(d.value)}</code></p>` : ''}
+      ${m.terminate
+        ? '<p>It was thrown out of a <code>noexcept</code> function, so <code>std::terminate</code> ended the program.</p>'
+        : '<p>Nothing caught it, so the program stopped. To handle it, wrap the call in <code>try { … } catch (const exception&amp; e) { … }</code>.</p>'}${inputNote}</div>`;
+    setOutPill('!', 'err');
+  } else if (m.kind === 'limit') {
+    html = `<div class="exit warn"><p class="exit-title">Stopped: more than 1 MB of output</p><p>Probably a loop that prints forever.</p></div>`;
+    setOutPill('!', 'err');
+  } else {
+    const [title, why] = explainCrash(m);
+    html = `<div class="exit err"><p class="exit-title">${title}</p><p>${why}</p>${inputNote}</div>`;
+    setOutPill('!', 'err');
+  }
+  box.innerHTML = html;
+}
+
+function stopProgram(reason, timedOut) {
+  if (busy !== 'running') return;
+  clearTimeout(runTimer);
+  killRunner();
+  setRunMode('idle');
+  const box = document.getElementById('exitBox');
+  if (box) {
+    box.innerHTML = `<div class="exit warn"><p class="exit-title">${esc(reason)}</p>${timedOut ? '<p>Your program may be stuck in a loop, or waiting for more input than the Input tab has.</p>' : ''}</div>`;
+  }
+  const el = document.getElementById('console');
+  if (el && !consoleStarted) el.innerHTML = '<span class="dim">(no output)</span>';
+  setOutPill('■', '');
+}
+
+runBtn.addEventListener('click', onRun);
+
+// ---------------------------------------------------------------- menu sheet
+const sheet = $('#sheet');
+const scrim = $('#scrim');
+let lastFocus = null;
+function openSheet() {
+  lastFocus = document.activeElement;
+  renderSaved();
+  renderOptions();
+  sheet.hidden = false;
+  scrim.hidden = false;
+  sheet.scrollTop = 0;
+  $('#sheetClose').focus({ preventScroll: true });
+}
+function closeSheet() {
+  sheet.hidden = true;
+  scrim.hidden = true;
+  if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
+}
+$('#menuBtn').addEventListener('click', openSheet);
+$('#sheetClose').addEventListener('click', closeSheet);
+scrim.addEventListener('click', closeSheet);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !sheet.hidden) closeSheet(); });
+
+function loadProgram(code, input, label) {
+  const prev = { code: editor.get(), input: stdinEl.value };
+  editor.set(code);
+  stdinEl.value = input;
+  updateInputPill();
+  saveDraft();
+  closeSheet();
+  showTab('code');
+  toast(`Opened ${label}`, 'Undo', () => {
+    editor.set(prev.code);
+    stdinEl.value = prev.input;
+    updateInputPill();
+    saveDraft();
+  });
+}
+
+// examples
+const exList = $('#exampleList');
+exList.innerHTML = EXAMPLES.map((ex) => `
+  <div class="row"><button class="row-main" type="button" data-ex="${ex.id}">
+    <span class="row-title">${esc(ex.title)}</span><span class="row-sub">${esc(ex.sub)}</span>
+  </button></div>`).join('');
+exList.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-ex]');
+  if (!b) return;
+  const ex = EXAMPLES.find((x) => x.id === b.dataset.ex);
+  loadProgram(ex.code, ex.input, ex.title);
+});
+
+// saved programs
+function getSaved() { const s = store.get('saved', []); return Array.isArray(s) ? s : []; }
+function setSaved(list) { store.set('saved', list); }
+let armedDelete = null;
+function renderSaved() {
+  const list = getSaved();
+  const el = $('#savedList');
+  if (!list.length) {
+    el.innerHTML = '<div class="empty">Nothing saved yet. Name this program above to keep a copy.</div>';
+    return;
+  }
+  el.innerHTML = list.map((p, i) => `
+    <div class="row">
+      <button class="row-main" type="button" data-open="${i}">
+        <span class="row-title">${esc(p.name)}</span>
+        <span class="row-sub">${new Date(p.t).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} · ${p.code.split('\n').length} lines</span>
+      </button>
+      <button class="mini-btn danger" type="button" data-del="${i}">${armedDelete === i ? 'Confirm' : 'Delete'}</button>
+    </div>`).join('');
+}
+$('#savedList').addEventListener('click', (e) => {
+  const open = e.target.closest('[data-open]');
+  const del = e.target.closest('[data-del]');
+  const list = getSaved();
+  if (open) {
+    const p = list[+open.dataset.open];
+    if (p) { $('#saveName').value = p.name; loadProgram(p.code, p.input || '', p.name); }
+  } else if (del) {
+    const i = +del.dataset.del;
+    if (armedDelete === i) {
+      const removed = list.splice(i, 1)[0];
+      setSaved(list);
+      armedDelete = null;
+      renderSaved();
+      toast(`Deleted ${removed.name}`, 'Undo', () => { const l = getSaved(); l.splice(i, 0, removed); setSaved(l); renderSaved(); });
+    } else {
+      armedDelete = i;
+      renderSaved();
+      setTimeout(() => { if (armedDelete === i) { armedDelete = null; renderSaved(); } }, 3000);
+    }
+  }
+});
+$('#saveBtn').addEventListener('click', () => {
+  const input = $('#saveName');
+  const name = input.value.trim() || `Program ${getSaved().length + 1}`;
+  const list = getSaved();
+  const entry = { name, code: editor.get(), input: stdinEl.value, t: Date.now() };
+  const i = list.findIndex((p) => p.name.toLowerCase() === name.toLowerCase());
+  if (i >= 0) list.splice(i, 1);
+  list.unshift(entry);
+  setSaved(list.slice(0, 50));
+  input.value = name;
+  renderSaved();
+  toast(i >= 0 ? `Updated ${name}` : `Saved ${name}`);
+});
+
+// build settings
+function renderOptions() {
+  for (const seg of document.querySelectorAll('.seg[data-opt]')) {
+    const key = seg.dataset.opt;
+    const o = OPTIONS[key];
+    seg.innerHTML = o.values.map((v, i) => `<button type="button" data-v="${i}" aria-pressed="${settings[key] === v}">${o.labels[i]}</button>`).join('');
+  }
+}
+document.querySelector('.opts').addEventListener('click', (e) => {
+  const b = e.target.closest('.seg button');
+  if (!b) return;
+  const key = b.closest('.seg').dataset.opt;
+  settings[key] = OPTIONS[key].values[+b.dataset.v];
+  store.set('settings', settings);
+  renderOptions();
+});
+
+$('#clearCache').addEventListener('click', async () => {
+  try {
+    if (typeof caches !== 'undefined') { await caches.delete('pocket-cpp-assets'); await caches.delete('pocket-cpp-v1'); }
+    toast('Deleted. It downloads again on your next run.');
+  } catch (e) {
+    toast('Nothing to delete here.');
+  }
+});
+
+// ---------------------------------------------------------------- app mode
+// Only the installable version (hosted on its own site) can share a public
+// link, install to the home screen, and work offline.
+const APP_MODE = true;
+if (APP_MODE) {
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const appUrl = location.origin + location.pathname.replace(/index\.html$/, '');
+
+  $('#shareSec').hidden = false;
+  $('#shareUrl').textContent = appUrl.replace(/^https?:\/\//, '');
+  $('#shareBtn').addEventListener('click', async () => {
+    const data = { title: 'Pocket C++', text: 'A C++ compiler that runs right on your phone. Free, no sign-up.', url: appUrl };
+    if (navigator.share) {
+      try { await navigator.share(data); } catch (e) {}
+      return;
+    }
+    try { await navigator.clipboard.writeText(appUrl); toast('Link copied'); }
+    catch (e) { toast(appUrl.replace(/^https?:\/\//, '')); }
+  });
+
+  let installPrompt = null;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    installPrompt = e;
+    if (!standalone) $('#installRow').hidden = false;
+  });
+  window.addEventListener('appinstalled', () => { $('#installRow').hidden = true; toast('Installed'); });
+  if (!standalone && ios) {
+    $('#installRow').hidden = false;
+    $('#installSub').textContent = 'In Safari: tap Share, then Add to Home Screen';
+    if (!store.get('installTipHidden', false)) $('#installStrip').hidden = false;
+  }
+  $('#installDismiss').addEventListener('click', () => {
+    $('#installStrip').hidden = true;
+    store.set('installTipHidden', true);
+    requestAnimationFrame(() => editor.refresh());
+  });
+  $('#installBtn').addEventListener('click', async () => {
+    if (installPrompt) {
+      installPrompt.prompt();
+      try { await installPrompt.userChoice; } catch (e) {}
+      installPrompt = null;
+    } else if (ios) {
+      closeSheet();
+      $('#installStrip').hidden = false;
+    } else {
+      toast('Use your browser menu: Install app, or Add to Home Screen');
+    }
+  });
+
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+
+  if ('serviceWorker' in navigator) {
+    const offerUpdate = (reg) => toast('A new version is ready', 'Update', () => {
+      if (reg.waiting) reg.waiting.postMessage('skipWaiting');
+    });
+    navigator.serviceWorker.register('sw.js').then((reg) => {
+      if (reg.waiting && navigator.serviceWorker.controller) offerUpdate(reg);
+      reg.addEventListener('updatefound', () => {
+        const w = reg.installing;
+        if (!w) return;
+        w.addEventListener('statechange', () => {
+          if (w.state === 'installed' && navigator.serviceWorker.controller) offerUpdate(reg);
+        });
+      });
+    }).catch(() => {});
+    // Reload only when an update replaces a running version, not on first install.
+    const hadController = !!navigator.serviceWorker.controller;
+    let reloading = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (reloading || !hadController) return;
+      reloading = true;
+      saveDraft();
+      location.reload();
+    });
+  }
+}
+
+// ---------------------------------------------------------------- start
+setRunMode('idle');
+renderWelcome();
+const savedTab = store.get('tab', 'code');
+showTab(tabs.includes(savedTab) && savedTab !== 'output' ? savedTab : 'code');
+// If the compiler was downloaded before, warm it up quietly.
+(async () => {
+  try {
+    if (typeof caches === 'undefined') return;
+    const c = await caches.open('pocket-cpp-assets');
+    const hit = await c.match('clang-c678a55c.gz.wasm');
+    if (hit) { warmed = true; ensureCompiler(); }
+  } catch (e) {}
+})();
+})();
+</script>
+</body>
+</html>
